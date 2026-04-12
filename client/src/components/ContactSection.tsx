@@ -30,21 +30,49 @@ export default function ContactSection() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  if (!form.name || !form.email || !form.message) {
+    toast.error("Please fill in all required fields.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("form-name", "contact");
+  formData.append("name", form.name);
+  formData.append("email", form.email);
+  formData.append("service", form.service);
+  formData.append("message", form.message);
+
+  try {
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Message sent! We'll be in touch within 24 hours.", {
-        description: `Thanks, ${form.name}! The VYBREX STUDIOS team will reach out soon.`,
-      });
-      setForm({ name: "", email: "", service: "", message: "" });
-    }, 1500);
-  };
+
+    await fetch("/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(formData as any).toString(),
+    });
+
+    toast.success("Message sent! We'll be in touch within 24 hours.", {
+      description: `Thanks, ${form.name}! The VYBREX STUDIOS team will reach out soon.`,
+    });
+
+    setForm({
+      name: "",
+      email: "",
+      service: "",
+      message: "",
+    });
+
+  } catch (error) {
+    toast.error("Something went wrong. Please try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <>
@@ -161,9 +189,15 @@ export default function ContactSection() {
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.15 }}
             >
-              <form
-                onSubmit={handleSubmit}
-                className="nex-card rounded-xl p-8 space-y-5"
+       <form
+  name="contact"
+  method="POST"
+  data-netlify="true"
+  netlify
+  onSubmit={handleSubmit}
+  className="nex-card rounded-xl p-8 space-y-5"
+>
+  <input type="hidden" name="form-name" value="contact" />
               >
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
@@ -174,8 +208,9 @@ export default function ContactSection() {
                       Name *
                     </label>
                     <input
-                      type="text"
-                      value={form.name}
+  type="text"
+  name="name"
+  value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="Your name"
                       className="w-full px-4 py-3 rounded text-sm outline-none transition-all duration-200"
