@@ -198,7 +198,7 @@ export default function ContactSection() {
   className="nex-card rounded-xl p-8 space-y-5"
 >
   <input type="hidden" name="form-name" value="contact" />
-              >
+              
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
                     <label
